@@ -1,0 +1,53 @@
+package com.swr.controller;
+
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.google.common.base.Preconditions;
+import com.swr.dto.Patient;
+import com.swr.service.PatientService;
+
+@RestController
+@RequestMapping("patient")
+public class PatientController {
+	private static String URLPATTERN="http://localhost:8080/SpringRestMvc/patient/";
+	
+	private PatientService patientService;
+	@Autowired
+	public void setPatientService(PatientService patientService) {
+		this.patientService = patientService;
+	}
+
+	@RequestMapping(value="/{url}",method=RequestMethod.GET)
+	@ResponseBody
+	public Patient findPatient(@PathVariable("url") String url){
+		Patient patient = null;
+		patient = patientService.findPatientByIdService(url);
+		return patient;
+	}
+	
+	@RequestMapping( method = RequestMethod.POST,consumes="application/xml")
+	   @ResponseStatus( HttpStatus.CREATED )
+	   @ResponseBody
+	   public String create( @RequestBody Patient patient ){
+	      Preconditions.checkNotNull( patient );
+	      
+	      String id = UUID.randomUUID().toString();
+	      patient.setUrl(id);
+	      int success = patientService.savePatientService(patient);
+	      if(success!=1){
+	    	  return "Something went Wrong";
+	      }else{
+	    	  return "Successfully Created"+" Patient Url Id is "+patient.getUrl();
+	      }
+	   }
+}
